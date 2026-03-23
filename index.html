@@ -4,547 +4,690 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>테일러드 | 남성 정장 전문 쇼핑몰</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-red: #FF0000;
-      --secondary-gold: #FFD700;
-      --secondary-gold-end: #FFA500;
-      --widget-bg: #f7f7f7;
-      --card-bg: #ffffff;
+      --bg: #0f0f0f;
+      --card: #151515;
+      --border: #222;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --text-light: #aaa;
+      --accent: #ffffff;
+      --completed: #ffffff;
+      --processing: #666;
     }
-    * { box-sizing: border-box; margin:0; padding:0; }
+    * { box-sizing:border-box; margin:0; padding:0; }
     body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: #f0f2f5;
-      padding: 20px 12px;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      padding: 32px 16px;
+      line-height: 1.4;
     }
-    .two-column-layout {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      max-width: 1200px;
+    .container {
+      max-width: 480px;
       margin: 0 auto;
     }
-    .column { flex: 1; min-width: 340px; }
-    .ticket-widget {
-      width: 100%;
-      background-color: var(--widget-bg);
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    .widget {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       overflow: hidden;
     }
-    .widget-header {
-      background-color: var(--primary-red);
-      color: #fff;
+    .header {
       padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .widget-header h2 { margin:0; font-size:1.45em; font-weight:700; }
-    .live-badge {
-      background: linear-gradient(to right, var(--secondary-gold), var(--secondary-gold-end));
-      color:#000; font-size:0.82em; font-weight:700; padding:5px 12px; border-radius:6px;
+    .header h2 {
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
     }
-    .status-board { padding:20px; }
-    .status-board h3 { margin:0 0 6px 0; font-size:1.25em; color:#222; }
-    #today-date { margin:0 0 16px 0; font-size:0.92em; color:#666; }
-    .scroll-container { height:460px; overflow:hidden; position:relative; }
-    .scroll-wrapper { position:absolute; top:0; left:0; width:100%; animation:scroll-up 65s linear infinite; }
-    @keyframes scroll-up { 0%{transform:translateY(0)} 100%{transform:translateY(-50%)} }
-    .live-list { list-style:none; padding:0; margin:0; }
-    .live-list li {
-      display:flex; align-items:center; gap:14px;
-      background:var(--card-bg); padding:18px 20px; margin-bottom:12px;
-      border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.04);
+    .content {
+      padding: 20px;
     }
-    .li-icon {
-      width:44px; height:44px; border-radius:50%;
-      display:flex; justify-content:center; align-items:center;
-      font-size:1.3em; font-weight:bold; color:#fff; flex-shrink:0;
+    .title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-light);
     }
-    .li-icon.completed { background-color:var(--primary-red); }
-    .li-icon.processing { background-color:#aaa; animation:spin 1.6s linear infinite; }
-    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
-    .content-wrapper { flex:1; }
-    .top-row { display:flex; align-items:center; gap:10px; font-size:0.94em; color:#666; }
-    .top-row .lw-name { margin-left:auto; text-align:right; font-weight:600; }
-    .status-badge { font-weight:700; white-space:nowrap; margin-left:8px; }
-    .status-badge.status-completed { color:var(--primary-red); }
-    .status-badge.status-processing { color:#777; }
-    .middle-row { font-size:1.12em; color:#222; font-weight:700; margin:5px 0 3px; }
-    .bottom-row { font-size:1.38em; font-weight:800; color:#111; }
-    .promo-column { display:flex; flex-direction:column; gap:20px; }
-    .promo-link {
-      display: block;
-      text-decoration: none;
-      border-radius: 16px;
+    .date {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .scroll-container {
+      height: 420px;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
     }
-    .promo-link:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    .scroll-wrapper {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      animation: scroll 90s linear infinite;
     }
-    .promo-image { width: 100%; height: auto; display: block; }
-    .goto-button {
-      display: block; text-align: center; padding: 16px 40px;
-      background: linear-gradient(to right, #ff1a1a, #d60000); color:white;
-      font-size:1.15em; font-weight:700; text-decoration:none;
-      border-radius:999px; box-shadow:0 5px 15px rgba(255,30,30,0.3);
-      transition: all 0.22s;
+    @keyframes scroll {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-50%); }
     }
-    .goto-button:hover {
-      transform: translateY(-3px); box-shadow:0 10px 25px rgba(255,40,40,0.4);
-      background: linear-gradient(to right, #d60000, #ff1a1a);
+    .list {
+      list-style: none;
     }
-    @media (max-width:920px) {
-      .two-column-layout { flex-direction:column; gap:32px; }
-      .scroll-container { height:420px; }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
     }
-    @media (max-width:480px) {
-      .goto-button { padding:14px 32px; font-size:1.05em; }
-      .status-board { padding:16px; }
+    .item:last-child { border-bottom: none; }
+    .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #222;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon.completed { background: var(--completed); color: #000; }
+    .icon.processing {
+      background: transparent;
+      border: 1px solid var(--processing);
+      color: var(--processing);
+      font-size: 1.4rem;
+    }
+    .info { flex: 1; }
+    .meta {
+      font-size: 0.81rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .name { font-weight: 500; }
+    .status {
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+    }
+    .status.completed { color: var(--accent); }
+    .status.processing { color: var(--text-muted); }
+    .service {
+      font-size: 0.95rem;
+      color: var(--text-light);
+      margin: 3px 0;
+    }
+    .amount {
+      font-size: 1.32rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    @media (max-width: 500px) {
+      .scroll-container { height: 380px; }
+      body { padding: 20px 12px; }
     }
   </style>
 </head>
 <body>
+<div class="container">
+  <div class="widget">
+    <div class="header">
+      <h2>실시간 현황</h2>
+    </div>
+    <div class="content">
+      <div class="title">승인금액 이용 내역</div>
+      <div class="date">2025년 3월 23일</div>
 
-<div class="two-column-layout">
+      <div class="scroll-container">
+        <div class="scroll-wrapper">
+          <ul class="list">
 
-  <!-- 왼쪽: LIVE 위젯 – 원본 20개 항목 그대로 -->
-  <div class="column">
-    <div class="ticket-widget">
-      <div class="widget-header">
-        <h2>작업의정석</h2>
-        <span class="live-badge">LIVE</span>
-      </div>
-      <div class="status-board">
-        <h3>승인금액 이용 현황</h3>
-        <p id="today-date">날짜 로딩중...</p>
-
-        <div class="scroll-container">
-          <div class="scroll-wrapper">
-
-            <ul class="live-list">
-              <li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">26분 전</span>
-                    <span class="lw-name">용인 박O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">587만원</span></div>
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>26분 전</span>
+                  <span class="name">용인 박O님</span>
+                  <span class="status completed">완료</span>
                 </div>
-              </li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">58분 전</span>
-                    <span class="lw-name">서울 신O민님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">331만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">55분 전</span>
-                    <span class="lw-name">창원 한O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">434만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">32분 전</span>
-                    <span class="lw-name">부천 정O경님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">641만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">35분 전</span>
-                    <span class="lw-name">안산 윤O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">441만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">창원 이O성님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">441만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">31분 전</span>
-                    <span class="lw-name">인천 조O찬님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">448만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">58분 전</span>
-                    <span class="lw-name">안양 한O수님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">210만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">59분 전</span>
-                    <span class="lw-name">광주 정O현님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">316만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">32분 전</span>
-                    <span class="lw-name">인천 송O연님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">559만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">32분 전</span>
-                    <span class="lw-name">창원 오O현님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">283만원</span></div>
-                </div></li><li>
-                <div class="li-icon processing">⟳</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">28분 전</span>
-                    <span class="lw-name">서울 권O님</span>
-                    <span class="status-badge status-processing">진행중</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">294만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">13분 전</span>
-                    <span class="lw-name">울산 김O준님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">698만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">40분 전</span>
-                    <span class="lw-name">용인 조O진님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">263만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">울산 박O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">837만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">26분 전</span>
-                    <span class="lw-name">안산 권O민님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">485만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">수원 정O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">358만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">6분 전</span>
-                    <span class="lw-name">대구 장O지님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">273만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">10분 전</span>
-                    <span class="lw-name">광주 권O율님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">851만원</span></div>
-                </div></li><li>
-                <div class="li-icon processing">⟳</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">제주 한O민님</span>
-                    <span class="status-badge status-processing">진행중</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">485만원</span></div>
-                </div></li>
-            </ul>
+                <div class="service">승인금액</div>
+                <div class="amount">5,870,000원</div>
+              </div>
+            </li>
 
-            <!-- 무한 스크롤용 복제 ul – 위와 동일한 20개 항목 그대로 복사 -->
-            <ul class="live-list">
-              <li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">26분 전</span>
-                    <span class="lw-name">용인 박O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">587만원</span></div>
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>58분 전</span>
+                  <span class="name">서울 신O민님</span>
+                  <span class="status completed">완료</span>
                 </div>
-              </li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">58분 전</span>
-                    <span class="lw-name">서울 신O민님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">331만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">55분 전</span>
-                    <span class="lw-name">창원 한O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">434만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">32분 전</span>
-                    <span class="lw-name">부천 정O경님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">641만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">35분 전</span>
-                    <span class="lw-name">안산 윤O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">441만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">창원 이O성님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">441만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">31분 전</span>
-                    <span class="lw-name">인천 조O찬님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">448만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">58분 전</span>
-                    <span class="lw-name">안양 한O수님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">210만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">59분 전</span>
-                    <span class="lw-name">광주 정O현님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">316만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">32분 전</span>
-                    <span class="lw-name">인천 송O연님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">559만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">32분 전</span>
-                    <span class="lw-name">창원 오O현님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">283만원</span></div>
-                </div></li><li>
-                <div class="li-icon processing">⟳</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">28분 전</span>
-                    <span class="lw-name">서울 권O님</span>
-                    <span class="status-badge status-processing">진행중</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">294만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">13분 전</span>
-                    <span class="lw-name">울산 김O준님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">698만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">40분 전</span>
-                    <span class="lw-name">용인 조O진님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">263만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">울산 박O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">837만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">26분 전</span>
-                    <span class="lw-name">안산 권O민님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">485만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">수원 정O님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">358만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">6분 전</span>
-                    <span class="lw-name">대구 장O지님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">273만원</span></div>
-                </div></li><li>
-                <div class="li-icon completed">✓</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">10분 전</span>
-                    <span class="lw-name">광주 권O율님</span>
-                    <span class="status-badge status-completed">입금완료</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">851만원</span></div>
-                </div></li><li>
-                <div class="li-icon processing">⟳</div>
-                <div class="content-wrapper">
-                  <div class="top-row">
-                    <span class="time">방금</span>
-                    <span class="lw-name">제주 한O민님</span>
-                    <span class="status-badge status-processing">진행중</span>
-                  </div>
-                  <div class="middle-row"><span class="service">승인금액</span></div>
-                  <div class="bottom-row"><span class="amount">485만원</span></div>
-                </div></li>
-            </ul>
+                <div class="service">승인금액</div>
+                <div class="amount">3,310,000원</div>
+              </div>
+            </li>
 
-          </div>
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>55분 전</span>
+                  <span class="name">창원 한O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,340,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>32분 전</span>
+                  <span class="name">부천 정O경님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">6,410,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>35분 전</span>
+                  <span class="name">안산 윤O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,410,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">창원 이O성님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,410,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>31분 전</span>
+                  <span class="name">인천 조O찬님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,480,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>58분 전</span>
+                  <span class="name">안양 한O수님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,100,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>59분 전</span>
+                  <span class="name">광주 정O현님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">3,160,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>32분 전</span>
+                  <span class="name">인천 송O연님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">5,590,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>32분 전</span>
+                  <span class="name">창원 오O현님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,830,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon processing">…</div>
+              <div class="info">
+                <div class="meta">
+                  <span>28분 전</span>
+                  <span class="name">서울 권O님</span>
+                  <span class="status processing">진행중</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,940,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>13분 전</span>
+                  <span class="name">울산 김O준님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">6,980,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>40분 전</span>
+                  <span class="name">용인 조O진님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,630,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">울산 박O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">8,370,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>26분 전</span>
+                  <span class="name">안산 권O민님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,850,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">수원 정O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">3,580,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>6분 전</span>
+                  <span class="name">대구 장O지님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,730,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>10분 전</span>
+                  <span class="name">광주 권O율님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">8,510,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon processing">…</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">제주 한O민님</span>
+                  <span class="status processing">진행중</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,850,000원</div>
+              </div>
+            </li>
+
+          </ul>
+
+          <!-- 무한 스크롤을 위한 복제본 (위와 동일) -->
+          <ul class="list">
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>26분 전</span>
+                  <span class="name">용인 박O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">5,870,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>58분 전</span>
+                  <span class="name">서울 신O민님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">3,310,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>55분 전</span>
+                  <span class="name">창원 한O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,340,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>32분 전</span>
+                  <span class="name">부천 정O경님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">6,410,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>35분 전</span>
+                  <span class="name">안산 윤O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,410,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">창원 이O성님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,410,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>31분 전</span>
+                  <span class="name">인천 조O찬님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,480,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>58분 전</span>
+                  <span class="name">안양 한O수님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,100,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>59분 전</span>
+                  <span class="name">광주 정O현님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">3,160,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>32분 전</span>
+                  <span class="name">인천 송O연님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">5,590,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>32분 전</span>
+                  <span class="name">창원 오O현님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,830,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon processing">…</div>
+              <div class="info">
+                <div class="meta">
+                  <span>28분 전</span>
+                  <span class="name">서울 권O님</span>
+                  <span class="status processing">진행중</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,940,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>13분 전</span>
+                  <span class="name">울산 김O준님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">6,980,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>40분 전</span>
+                  <span class="name">용인 조O진님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,630,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">울산 박O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">8,370,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>26분 전</span>
+                  <span class="name">안산 권O민님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,850,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">수원 정O님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">3,580,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>6분 전</span>
+                  <span class="name">대구 장O지님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">2,730,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon completed">✓</div>
+              <div class="info">
+                <div class="meta">
+                  <span>10분 전</span>
+                  <span class="name">광주 권O율님</span>
+                  <span class="status completed">완료</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">8,510,000원</div>
+              </div>
+            </li>
+
+            <li class="item">
+              <div class="icon processing">…</div>
+              <div class="info">
+                <div class="meta">
+                  <span>방금</span>
+                  <span class="name">제주 한O민님</span>
+                  <span class="status processing">진행중</span>
+                </div>
+                <div class="service">승인금액</div>
+                <div class="amount">4,850,000원</div>
+              </div>
+            </li>
+
+          </ul>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- 오른쪽: 이미지 + 버튼 (이미지 클릭 가능) -->
   <div class="column promo-column">
